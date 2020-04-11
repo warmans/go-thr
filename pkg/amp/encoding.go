@@ -3,7 +3,9 @@ package amp
 import (
 	"bytes"
 	"encoding/binary"
+	"encoding/hex"
 	"github.com/rakyll/portmidi"
+	"go.uber.org/zap"
 )
 
 // standard sysex start and end bytes
@@ -16,18 +18,26 @@ const msgEnd = 0xf7
 const msgTypeOne = 0x00
 const msgTypeTwo = 0x01
 
-type CommandSet []*SingleCommand
+type CommandSet []Command
 
 type Command interface {
 	Bytes(seqNum uint32) []byte
 }
 
-type SingleCommand struct {
-	Type byte
+type RawCommmand struct {
+	Data []byte
+}
+
+func (c *RawCommmand) Bytes(seqNum uint32) []byte {
+	return c.Data
+}
+
+type THRCommand struct {
+	Type    byte
 	Payload []byte
 }
 
-func (c *SingleCommand) Bytes(seqNum uint32) []byte {
+func (c *THRCommand) Bytes(seqNum uint32) []byte {
 	// standard sysex start
 	buff := []byte{msgStart}
 	// The manufacturer's code uses the extended 3 byte format.
@@ -45,6 +55,32 @@ func (c *SingleCommand) Bytes(seqNum uint32) []byte {
 	// standard sysex end
 	buff = append(buff, msgEnd)
 	return buff
+}
+
+func NewSession(out *portmidi.Stream, logger *zap.Logger) *Session {
+	return &Session{out: out, logger: logger}
+}
+
+// Session manages sequence numbers
+type Session struct {
+	sequenceNum uint32
+	out         *portmidi.Stream
+	logger      *zap.Logger
+}
+
+func (s *Session) Send(cmds CommandSet) error {
+	for _, cmd := range cmds {
+		data := cmd.Bytes(s.sequenceNum)
+		if err := s.out.WriteSysExBytes(portmidi.Time(), data); err != nil {
+			return err
+		}
+		if s.logger != nil {
+			s.logger.Debug("sent", zap.String("data", hex.EncodeToString(data)))
+		}
+		s.sequenceNum++
+
+	}
+	return nil
 }
 
 func yamahaManufacturerCode() []byte {
@@ -69,24 +105,4 @@ func singleByteInt(num int8) byte {
 	bs := &bytes.Buffer{}
 	binary.Write(bs, binary.LittleEndian, num)
 	return bs.Bytes()[0]
-}
-
-func NewSession(out *portmidi.Stream) *Session {
-	return &Session{out: out}
-}
-
-// Session manages sequence numbers
-type Session struct {
-	sequenceNum uint32
-	out *portmidi.Stream
-}
-
-func (s *Session) Send(cmds CommandSet) error {
-	for _, cmd := range cmds {
-		if err := s.out.WriteSysExBytes(portmidi.Time(), cmd.Bytes(s.sequenceNum)); err != nil {
-			return err
-		}
-		s.sequenceNum++
-	}
-	return nil
 }

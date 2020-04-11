@@ -38,10 +38,10 @@ func main() {
 	}
 	defer in.Close()
 
-	session := amp.NewSession(out)
+	session := amp.NewSession(out, logger)
 
-	if err := session.Send(amp.EnableEvents); err != nil {
-		logger.Fatal("failed to send command to enable events", zap.Error(err))
+	if err := session.Send(amp.Init); err != nil {
+		logger.Fatal("failed to init communication with device", zap.Error(err))
 	}
 
 	fmt.Println("Listening...")

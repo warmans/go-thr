@@ -1,18 +1,18 @@
 package main
 
 import (
+	"encoding/hex"
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/warmans/go-thr/pkg/amp"
 	"go.uber.org/zap"
 	"log"
 	"os"
+	"time"
 
 	"github.com/rakyll/portmidi"
 )
 
-//todo: this only seems to work correctly if the app has been started at least once.
-// there must be some kind of initialization missing.
+// This command will cycle through all the presets once then go into an endless listen loop for responses.
 func main() {
 	os.Setenv("DEBUG", "true")
 
@@ -36,15 +36,32 @@ func main() {
 	}
 	defer in.Close()
 
-	session := amp.NewSession(out)
 
-	fmt.Println("Switch channel 2...")
-	if err := session.Send(amp.SelectPreset(2)); err != nil {
-		logger.Fatal("failed to send command to enable events", zap.Error(err))
+	listener := amp.NewListener(in)
+	defer listener.Close()
+
+	session := amp.NewSession(out, logger)
+
+	if err := session.Send(amp.Init); err != nil {
+		logger.Fatal("failed to init communication with device", zap.Error(err))
 	}
 
-	fmt.Println("Listening for responses...")
-	for e := range in.Listen() {
-		spew.Dump(e)
+	for i := int8(0); i < 5; i++ {
+		fmt.Printf("Switch channel %d...\n", i)
+		if err := session.Send(amp.SelectPreset(i)); err != nil {
+			logger.Fatal("failed to send command to enable events", zap.Error(err))
+		}
+		time.Sleep(time.Second)
+	}
+
+	go func() {
+		fmt.Println("Listening for responses...")
+		for e := range listener.Data() {
+			fmt.Println("DATA >", hex.EncodeToString(e))
+		}
+	}()
+
+	if err := listener.Listen(); err != nil {
+		logger.Fatal("listener failed", zap.Error(err))
 	}
 }
