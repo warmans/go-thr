@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/warmans/go-thr/pkg/amp"
-	"github.com/warmans/go-thr/pkg/sysex"
 	"go.uber.org/zap"
 	"log"
 	"os"
@@ -37,9 +36,11 @@ func main() {
 	}
 	defer in.Close()
 
+	session := amp.NewSession(out)
+
 	fmt.Println("Switch channel 2...")
-	if err := sysex.SelectChannelTwo.Send(out); err != nil {
-		logger.Fatal("failed select channel", zap.Error(err))
+	if err := session.Send(amp.SelectPreset(2)); err != nil {
+		logger.Fatal("failed to send command to enable events", zap.Error(err))
 	}
 
 	fmt.Println("Listening for responses...")

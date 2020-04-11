@@ -4,14 +4,12 @@ import (
 	"fmt"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/warmans/go-thr/pkg/amp"
-	"github.com/warmans/go-thr/pkg/sysex"
 	"go.uber.org/zap"
 	"log"
 	"os"
 
 	"github.com/rakyll/portmidi"
 )
-
 
 func main() {
 
@@ -40,7 +38,9 @@ func main() {
 	}
 	defer in.Close()
 
-	if err := sysex.EnableEvents.Send(out); err != nil {
+	session := amp.NewSession(out)
+
+	if err := session.Send(amp.EnableEvents); err != nil {
 		logger.Fatal("failed to send command to enable events", zap.Error(err))
 	}
 
