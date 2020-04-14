@@ -8,6 +8,7 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"github.com/warmans/go-thr/pkg/thr"
 	"github.com/warmans/go-thr/pkg/thr/command"
+	"github.com/warmans/go-thr/pkg/thr/message"
 	"go.uber.org/zap"
 
 	"github.com/rakyll/portmidi"
@@ -40,7 +41,7 @@ func main() {
 	}
 	defer in.Close()
 
-	session := command.NewSession(out, logger)
+	session := thr.NewSession(out, logger)
 
 	if err := session.Send(thr.Init); err != nil {
 		logger.Fatal("failed to init communication with device", zap.Error(err))

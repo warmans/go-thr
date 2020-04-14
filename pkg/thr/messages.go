@@ -1,60 +1,60 @@
 package thr
 
 import (
-	"github.com/warmans/go-thr/pkg/thr/command"
+	"github.com/warmans/go-thr/pkg/thr/message"
 	"github.com/warmans/go-thr/pkg/thr/util"
 )
 
 // These commands will set-up the connection to allow other commands to work correctly (e.g. SetPreset)
-var Init = command.CommandSet{
+var Init = message.MessageSet{
 	// ??
-	&command.RawCommmand{Data: []byte{0xf0, 0x7e, 0x7f, 0x06, 0x01, 0xf7}},
-	&command.THRCommand{
-		Type:        command.TypeOne,
+	&message.RawMessage{Data: []byte{0xf0, 0x7e, 0x7f, 0x06, 0x01, 0xf7}},
+	&message.THRMessage{
+		Type:        message.TypeOne,
 		PayloadType: 0x07,
 		Payload:     []byte{0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
 	},
 	// causes amp to send events when buttons are pressed
-	&command.THRCommand{
-		Type:        command.TypeOne,
+	&message.THRMessage{
+		Type:        message.TypeOne,
 		PayloadType: 0x07,
 		Payload:     []byte{0x00, 0x04, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
 	},
-	&command.THRCommand{
-		Type:        command.TypeOne,
+	&message.THRMessage{
+		Type:        message.TypeOne,
 		PayloadType: 0x03,
 		Payload:     []byte{0x28, 0x24, 0x6b, 0x09, 0x18, 0x00, 0x00, 0x00},
 	},
 	// ??
-	&command.THRCommand{
-		Type:        command.TypeOne,
+	&message.THRMessage{
+		Type:        message.TypeOne,
 		PayloadType: 0x07,
 		Payload:     []byte{0x00, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
 	},
 }
 
 // GetActivePreset will return what the currently active channel.
-var GetActivePreset = command.CommandSet{
-	&command.THRCommand{
-		Type:        command.TypeOne,
+var GetActivePreset = message.MessageSet{
+	&message.THRMessage{
+		Type:        message.TypeOne,
 		PayloadType: 0x07,
 		Payload:     []byte{0x00, 0x0d, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
 	},
-	&command.THRCommand{
-		Type:        command.TypeOne,
+	&message.THRMessage{
+		Type:        message.TypeOne,
 		PayloadType: 0x03,
 		Payload:     []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
 	},
 }
 
 // SelectPreset will change to one of the 5 user presets.
-func SelectPreset(channelNumber int8) command.CommandSet {
+func SelectPreset(channelNumber int8) message.MessageSet {
 	if channelNumber > 5 {
 		channelNumber = 0
 	}
-	return command.CommandSet{
-		&command.THRCommand{
-			Type:        command.TypeTwo,
+	return message.MessageSet{
+		&message.THRMessage{
+			Type:        message.TypeTwo,
 			PayloadType: 0x0b,
 			Payload:     []byte{0x00, 0x0e, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, util.SingleByteInt(channelNumber), 0x00, 0x00, 0x00, 0x00, 0x00},
 		},

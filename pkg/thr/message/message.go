@@ -1,4 +1,4 @@
-package command
+package message
 
 import (
 	"encoding/hex"
@@ -12,32 +12,32 @@ import (
 // msg type one seems to be used predominantly for "getter" type commands while
 // msg type two seems to be used for "setter" commands. However this doesn't seem to be the actual
 // system because sometimes things I would expect to use 00 use 01.
-type commandType byte
+type MessageType byte
 
-const TypeOne commandType = 0x00
-const TypeTwo commandType = 0x01
+const TypeOne MessageType = 0x00
+const TypeTwo MessageType = 0x01
 
-type CommandSet []Command
+type MessageSet []Encodable
 
-type Command interface {
+type Encodable interface {
 	Bytes(seqNum uint32) []byte
 }
 
-type RawCommmand struct {
+type RawMessage struct {
 	Data []byte
 }
 
-func (c *RawCommmand) Bytes(seqNum uint32) []byte {
+func (c *RawMessage) Bytes(seqNum uint32) []byte {
 	return c.Data
 }
 
-type THRCommand struct {
-	Type        commandType
+type THRMessage struct {
+	Type        MessageType
 	PayloadType byte
 	Payload     []byte
 }
 
-func (c *THRCommand) Bytes(seqNum uint32) []byte {
+func (c *THRMessage) Bytes(seqNum uint32) []byte {
 	msg := encoding.Message{
 		ManufacturerCode: yamahaManufacturerCode(),
 		Preamble:         preamble(),
@@ -50,31 +50,8 @@ func (c *THRCommand) Bytes(seqNum uint32) []byte {
 	return msg.Encode()
 }
 
-func NewSession(out *portmidi.Stream, logger *zap.Logger) *Session {
-	return &Session{out: out, logger: logger}
-}
 
-// Session manages sequence numbers
-type Session struct {
-	sequenceNum uint32
-	out         *portmidi.Stream
-	logger      *zap.Logger
-}
 
-func (s *Session) Send(cmds CommandSet) error {
-	for _, cmd := range cmds {
-		data := cmd.Bytes(s.sequenceNum)
-		if err := s.out.WriteSysExBytes(portmidi.Time(), data); err != nil {
-			return err
-		}
-		if s.logger != nil {
-			s.logger.Debug("sent", zap.String("data", hex.EncodeToString(data)))
-		}
-		s.sequenceNum++
-
-	}
-	return nil
-}
 
 func yamahaManufacturerCode() [3]byte {
 	// manufacturer ID 0x00 indicates a 3 byte ID

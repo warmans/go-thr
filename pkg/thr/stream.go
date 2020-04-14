@@ -1,10 +1,14 @@
 package thr
 
 import (
+	"encoding/hex"
 	"fmt"
 	"regexp"
+	"time"
 
 	"github.com/rakyll/portmidi"
+	"github.com/warmans/go-thr/pkg/thr/encoding"
+	"github.com/warmans/go-thr/pkg/thr/message"
 	"go.uber.org/zap"
 )
 
@@ -45,4 +49,91 @@ func GetStream(log *zap.Logger, nameMatcher *regexp.Regexp, streamType StreamTyp
 	}
 
 	return nil, fmt.Errorf("device not found")
+}
+
+func NewListener(in *portmidi.Stream) *Listener {
+	return &Listener{
+		in:     in,
+		c:      make(chan *encoding.Message, 100),
+		closed: make(chan struct{}, 0),
+	}
+}
+
+type Listener struct {
+	in *portmidi.Stream
+	c  chan *encoding.Message
+
+	close  bool
+	closed chan struct{}
+}
+
+func (l *Listener) Close() {
+	l.close = true
+	<-l.closed
+}
+
+func (l *Listener) shutdown() {
+	close(l.c)
+	l.closed <- struct{}{}
+}
+
+func (l *Listener) Data() <-chan *encoding.Message {
+	return l.c
+}
+
+func (l *Listener) Listen() error {
+	buff := []byte{}
+	for {
+		time.Sleep(10 * time.Millisecond)
+		if l.close == true {
+			l.shutdown()
+			return nil
+		}
+		b, err := l.in.ReadSysExBytes(1024)
+		if err != nil {
+			l.shutdown()
+			return err
+		}
+		if len(b) > 0 {
+			buff = append(buff, b...)
+		}
+
+		// read as many messages from the buffer as possible
+		for {
+			var msg *encoding.Message
+			msg, buff = encoding.Next(buff)
+			if msg != nil {
+				l.c <- msg
+				continue
+			}
+			break
+		}
+	}
+}
+
+
+func NewSession(out *portmidi.Stream, logger *zap.Logger) *Session {
+	return &Session{out: out, logger: logger}
+}
+
+// Session just tracks sequence numbers for messages.
+type Session struct {
+	sequenceNum uint32
+	out         *portmidi.Stream
+	logger      *zap.Logger
+}
+
+func (s *Session) Send(cmds message.MessageSet) error {
+	for _, cmd := range cmds {
+		data := cmd.Bytes(s.sequenceNum)
+		if err := s.out.WriteSysExBytes(portmidi.Time(), data); err != nil {
+			return err
+		}
+		if s.logger != nil {
+			s.logger.Debug("sent", zap.String("data", hex.EncodeToString(data)))
+		}
+		s.sequenceNum++
+
+	}
+	return nil
 }
