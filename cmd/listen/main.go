@@ -2,11 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
-	"github.com/warmans/go-thr/pkg/amp"
-	"go.uber.org/zap"
 	"log"
 	"os"
+
+	"github.com/davecgh/go-spew/spew"
+	"github.com/warmans/go-thr/pkg/thr"
+	"github.com/warmans/go-thr/pkg/thr/command"
+	"go.uber.org/zap"
 
 	"github.com/rakyll/portmidi"
 )
@@ -26,21 +28,21 @@ func main() {
 	fmt.Printf("there are %d devices\n", portmidi.CountDevices())
 	fmt.Printf("default input deviceID is %v\n", portmidi.DefaultInputDeviceID())
 
-	in, err := amp.GetThrInput(logger)
+	in, err := thr.GetThrInput(logger)
 	if err != nil {
 		logger.Fatal("failed to input find device", zap.Error(err))
 	}
 	defer in.Close()
 
-	out, err := amp.GetThrOutput(logger)
+	out, err := thr.GetThrOutput(logger)
 	if err != nil {
 		logger.Fatal("failed to output find device", zap.Error(err))
 	}
 	defer in.Close()
 
-	session := amp.NewSession(out, logger)
+	session := command.NewSession(out, logger)
 
-	if err := session.Send(amp.Init); err != nil {
+	if err := session.Send(thr.Init); err != nil {
 		logger.Fatal("failed to init communication with device", zap.Error(err))
 	}
 

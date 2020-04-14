@@ -1,13 +1,15 @@
 package main
 
 import (
-	"encoding/hex"
 	"fmt"
-	"github.com/warmans/go-thr/pkg/amp"
-	"go.uber.org/zap"
 	"log"
 	"os"
 	"time"
+
+	"github.com/warmans/go-thr/pkg/thr"
+	"github.com/warmans/go-thr/pkg/thr/command"
+	"github.com/warmans/go-thr/pkg/thr/encoding"
+	"go.uber.org/zap"
 
 	"github.com/rakyll/portmidi"
 )
@@ -24,31 +26,30 @@ func main() {
 	}
 	defer portmidi.Terminate()
 
-	in, err := amp.GetThrInput(logger)
+	in, err := thr.GetThrInput(logger)
 	if err != nil {
 		logger.Fatal("failed to input find device", zap.Error(err))
 	}
 	defer in.Close()
 
-	out, err := amp.GetThrOutput(logger)
+	out, err := thr.GetThrOutput(logger)
 	if err != nil {
 		logger.Fatal("failed to output find device", zap.Error(err))
 	}
 	defer in.Close()
 
-
-	listener := amp.NewListener(in)
+	listener := encoding.NewListener(in)
 	defer listener.Close()
 
-	session := amp.NewSession(out, logger)
+	session := command.NewSession(out, logger)
 
-	if err := session.Send(amp.Init); err != nil {
+	if err := session.Send(thr.Init); err != nil {
 		logger.Fatal("failed to init communication with device", zap.Error(err))
 	}
 
 	for i := int8(0); i < 5; i++ {
 		fmt.Printf("Switch channel %d...\n", i)
-		if err := session.Send(amp.SelectPreset(i)); err != nil {
+		if err := session.Send(thr.SelectPreset(i)); err != nil {
 			logger.Fatal("failed to send command to enable events", zap.Error(err))
 		}
 		time.Sleep(time.Second)
@@ -57,7 +58,7 @@ func main() {
 	go func() {
 		fmt.Println("Listening for responses...")
 		for e := range listener.Data() {
-			fmt.Println("DATA >", hex.EncodeToString(e))
+			fmt.Println("DATA >", e.Hex())
 		}
 	}()
 
