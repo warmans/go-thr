@@ -37,9 +37,24 @@ func TestNext_SingleMessage(t *testing.T) {
 	require.EqualValues(t, [3]byte{0x24, 0x02, 0x4d}, msg.Preamble)
 	require.EqualValues(t, 0x00, msg.MessageType)
 	require.EqualValues(t, 0x0c, msg.SequenceNum)
-	require.EqualValues(t, [2]byte{0x00, 0x00}, msg.Reserved1)
-	require.EqualValues(t, 0x0b, msg.PayloadType)
+	require.EqualValues(t, [3]byte{0x00,0x00, 0x0b}, msg.PayloadType)
 	require.EqualValues(t, "000100000004000000006b0031010000", hex.EncodeToString(msg.Payload))
+
+	// try and re-encode the message
+	require.EqualValues(t, sampleMessage, hex.EncodeToString(msg.Encode()))
+}
+
+func TestNext_SingleLongerMessage(t *testing.T) {
+	sampleMessage := "f000010c24024d00330001070002000000100000000002000000030000000002000000000000000000000000f7"
+	// check message is decoded
+	msg, buff := Next(hexMustDecode(sampleMessage))
+	require.EqualValues(t, 0, len(buff), hex.EncodeToString(buff))
+	require.EqualValues(t, [3]byte{0x00, 0x01, 0x0c}, msg.ManufacturerCode)
+	require.EqualValues(t, [3]byte{0x24, 0x02, 0x4d}, msg.Preamble)
+	require.EqualValues(t, 0x00, msg.MessageType)
+	require.EqualValues(t, 0x33, msg.SequenceNum)
+	require.EqualValues(t, [3]byte{0x00, 0x01, 0x07}, msg.PayloadType)
+	require.EqualValues(t, "0002000000100000000002000000030000000002000000000000000000000000", hex.EncodeToString(msg.Payload))
 
 	// try and re-encode the message
 	require.EqualValues(t, sampleMessage, hex.EncodeToString(msg.Encode()))

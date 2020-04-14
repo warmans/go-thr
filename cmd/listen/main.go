@@ -5,10 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/warmans/go-thr/pkg/thr"
-	"github.com/warmans/go-thr/pkg/thr/command"
-	"github.com/warmans/go-thr/pkg/thr/message"
 	"go.uber.org/zap"
 
 	"github.com/rakyll/portmidi"
@@ -47,8 +44,17 @@ func main() {
 		logger.Fatal("failed to init communication with device", zap.Error(err))
 	}
 
+	listener := thr.NewListener(in)
+	defer listener.Close()
+	go func() {
+		if err := listener.Listen(); err != nil {
+			logger.Error("listen failed", zap.Error(err))
+		}
+	}()
+
 	fmt.Println("Listening...")
-	for e := range in.Listen() {
-		spew.Dump(e)
+	for msg := range listener.Data() {
+
+		fmt.Println(msg.Print("PAYLOAD > {{.Payload}}"))
 	}
 }

@@ -1,12 +1,8 @@
 package message
 
 import (
-	"encoding/hex"
-
-	"github.com/rakyll/portmidi"
 	"github.com/warmans/go-thr/pkg/thr/encoding"
 	"github.com/warmans/go-thr/pkg/thr/util"
-	"go.uber.org/zap"
 )
 
 // msg type one seems to be used predominantly for "getter" type commands while
@@ -33,7 +29,7 @@ func (c *RawMessage) Bytes(seqNum uint32) []byte {
 
 type THRMessage struct {
 	Type        MessageType
-	PayloadType byte
+	PayloadType [3]byte
 	Payload     []byte
 }
 
@@ -43,15 +39,11 @@ func (c *THRMessage) Bytes(seqNum uint32) []byte {
 		Preamble:         preamble(),
 		MessageType:      byte(c.Type),
 		SequenceNum:      sequenceNumber(seqNum),
-		Reserved1:        [2]byte{0x00, 0x00},
 		PayloadType:      c.PayloadType,
 		Payload:          c.Payload,
 	}
 	return msg.Encode()
 }
-
-
-
 
 func yamahaManufacturerCode() [3]byte {
 	// manufacturer ID 0x00 indicates a 3 byte ID

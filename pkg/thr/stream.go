@@ -82,35 +82,37 @@ func (l *Listener) Data() <-chan *encoding.Message {
 }
 
 func (l *Listener) Listen() error {
+	defer l.shutdown()
+
 	buff := []byte{}
 	for {
 		time.Sleep(10 * time.Millisecond)
 		if l.close == true {
-			l.shutdown()
 			return nil
 		}
 		b, err := l.in.ReadSysExBytes(1024)
 		if err != nil {
-			l.shutdown()
 			return err
 		}
 		if len(b) > 0 {
+			//fmt.Printf("%s\n\n", hex.EncodeToString(b))
 			buff = append(buff, b...)
 		}
 
 		// read as many messages from the buffer as possible
-		for {
-			var msg *encoding.Message
-			msg, buff = encoding.Next(buff)
-			if msg != nil {
-				l.c <- msg
-				continue
+		if len(buff) > 0 {
+			for {
+				var msg *encoding.Message
+				msg, buff = encoding.Next(buff)
+				if msg != nil {
+					l.c <- msg
+					continue
+				}
+				break
 			}
-			break
 		}
 	}
 }
-
 
 func NewSession(out *portmidi.Stream, logger *zap.Logger) *Session {
 	return &Session{out: out, logger: logger}
