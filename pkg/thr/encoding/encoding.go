@@ -70,7 +70,6 @@ func payloadSize(payloadType [3]byte) int {
 		// 0x03 denotes a short message (12 bytes) + msgEnd
 		payloadSize = 12
 	case [3]byte{0x00, 0x00, 0x07}, [3]byte{0x00, 0x00, 0x08}, [3]byte{0x00, 0x00, 0x0b}:
-		// consider all others (e.g. 0x07, 0x08, 0x0b) 16 bytes
 		payloadSize = 16
 	case [3]byte{0x00, 0x01, 0x07}:
 		payloadSize = 32
