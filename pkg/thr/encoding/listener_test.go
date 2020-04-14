@@ -25,11 +25,13 @@ func TestNext_DecodeMultipleResponses(t *testing.T) {
 	require.EqualValues(t, "f000010c24024d000c00000b000100000004000000006b0031010000f7", msgs[0].Hex())
 	require.EqualValues(t, "f000010c24024d000d00000b00010000000400000000000000000000f7", msgs[1].Hex())
 	require.EqualValues(t, "f000010c24024d000e00000800010000000100000000000000000000f7", msgs[2].Hex())
-
 }
 
 func TestNext_SingleMessage(t *testing.T) {
-	msg, buff := Next(hexMustDecode("f000010c24024d000c00000b000100000004000000006b0031010000f7"))
+	sampleMessage := "f000010c24024d000c00000b000100000004000000006b0031010000f7"
+
+	// check message is decoded
+	msg, buff := Next(hexMustDecode(sampleMessage))
 	require.EqualValues(t, 0, len(buff))
 	require.EqualValues(t, [3]byte{0x00, 0x01, 0x0c}, msg.ManufacturerCode)
 	require.EqualValues(t, [3]byte{0x24, 0x02, 0x4d}, msg.Preamble)
@@ -38,6 +40,9 @@ func TestNext_SingleMessage(t *testing.T) {
 	require.EqualValues(t, [2]byte{0x00, 0x00}, msg.Reserved1)
 	require.EqualValues(t, 0x0b, msg.PayloadType)
 	require.EqualValues(t, "000100000004000000006b0031010000", hex.EncodeToString(msg.Payload))
+
+	// try and re-encode the message
+	require.EqualValues(t, sampleMessage, hex.EncodeToString(msg.Encode()))
 }
 
 func hexMustDecode(str string) []byte {
