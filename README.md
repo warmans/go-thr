@@ -21,12 +21,12 @@ Messages are in the following format (as far as I've been able to decode their m
 |                 | Num. Bytes | Example    | Description  
 |-----------------|------------|------------|-------------------------------------
 | Start           | 1          | `f0`       | standard sysex start byte.
-| Manufacturer ID | 3          | `00 01 0x` | Yamaha (line6) extended manufacturer code
+| Manufacturer ID | 3          | `00 01 0c` | Yamaha (line6) extended manufacturer code
 | Preamble        | 3          | `24 02 4d` | Some kind of device ID I guess. This never changes on my device.
 | ?               | 1          | `00`       | Seems to be some kind of command grouping. Usually 00 or 01.
 | Sequence Num.   | 1          | `01`       | This gets incremented for each command sent. But seems to be independent between "groups" (previous byte).
 | Payload Desc.   | 3          | `00 00 03` | These three bytes seem to describe the payload (e.g. length). 
-| Payload         | ?          | `...`      | The payload size seems to depend on the previous byte and contains mysterious data in an unknown format.
+| Payload         | ?          | `...`      | The payload size seems to depend on the previous bytes and contains mysterious data in an unknown format.
 | End             | 1          | `f7`       | Standard sysex end byte.
 
 
