@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/warmans/go-thr/pkg/thr"
+	"github.com/warmans/go-thr"
 	"go.uber.org/zap"
 
 	"github.com/rakyll/portmidi"

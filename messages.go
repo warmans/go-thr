@@ -1,8 +1,8 @@
 package thr
 
 import (
-	"github.com/warmans/go-thr/pkg/thr/message"
-	"github.com/warmans/go-thr/pkg/thr/util"
+	"github.com/warmans/go-thr/message"
+	"github.com/warmans/go-thr/util"
 )
 
 // These commands will set-up the connection to allow other commands to work correctly (e.g. SetPreset)

@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/rakyll/portmidi"
-	"github.com/warmans/go-thr/pkg/thr/encoding"
-	"github.com/warmans/go-thr/pkg/thr/message"
+	"github.com/warmans/go-thr/encoding"
+	"github.com/warmans/go-thr/message"
 	"go.uber.org/zap"
 )
 

@@ -1,8 +1,8 @@
 package message
 
 import (
-	"github.com/warmans/go-thr/pkg/thr/encoding"
-	"github.com/warmans/go-thr/pkg/thr/util"
+	"github.com/warmans/go-thr/encoding"
+	"github.com/warmans/go-thr/util"
 )
 
 // msg type one seems to be used predominantly for "getter" type commands while

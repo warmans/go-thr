@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/warmans/go-thr/pkg/thr"
+	"github.com/warmans/go-thr"
 	"go.uber.org/zap"
 
 	"github.com/rakyll/portmidi"

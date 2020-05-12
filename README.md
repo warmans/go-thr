@@ -1,6 +1,6 @@
 Experimental code needed for THRII footswitch POC.
 
-### Setup (Ubuntu)
+### Prerequisites (Ubuntu)
 
 Requires `libportmidi-dev`
 
