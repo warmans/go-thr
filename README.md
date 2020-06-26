@@ -39,5 +39,5 @@ You can interact with the amp using raw sysex messages using Bome SendSX.
 
 Pressing buttons on the amp will emit events (e.g. that you can view on sendsx) HOWEVER
 this is only true if you first of all tell the amp to do so, either by opening and closing the app first,
-or by sending the command see (pkg/amp/requests).
+or by sending the command see (messages.go).
  
