@@ -52,7 +52,7 @@ func yamahaManufacturerCode() [3]byte {
 
 // mystery stuff that gets send with every command
 func preamble() [3]byte {
-	return [3]byte{0x22, 0x02, 0x4d}
+	return [3]byte{0x24, 0x00, 0x4d}
 }
 
 func sequenceNumber(seqNum uint32) byte {
