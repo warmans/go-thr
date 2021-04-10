@@ -8,6 +8,7 @@ import (
 // These commands will set-up the connection to allow other commands to work correctly (e.g. SetPreset)
 var Init = message.MessageSet{
 	// ??
+	&message.RawMessage{Data: []byte{0xf0, 0xf7, 0x00}},
 	&message.RawMessage{Data: []byte{0xf0, 0x7e, 0x7f, 0x06, 0x01, 0xf7}},
 	&message.THRMessage{
 		Type:        message.TypeOne,
