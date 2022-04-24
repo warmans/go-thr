@@ -1,5 +1,7 @@
 # NOTE: As far as I know this code no longer works. It seems each update to the amp may break commands being sent over sysex. But I will leave it up in case it helps anyone start their own project.
 
+See this alternative project: https://github.com/martinzw/THRII-direct-USB-pedalboard
+
 Experimental code needed for THRII footswitch POC.
 
 ### Prerequisites (Ubuntu)
